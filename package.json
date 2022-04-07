@@ -32,7 +32,8 @@
     "@octokit/rest": "^18.5.2",
     "bluebird": "^3.7.2",
     "ghost-storage-base": "^0.0.5",
-    "is-url": "^1.2.4"
+    "is-url": "^1.2.4",
+    "sharp": "^0.30.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.13.14",

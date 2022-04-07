@@ -6,6 +6,7 @@ import fs from 'fs'
 import BaseStorage from 'ghost-storage-base'
 import isUrl from 'is-url'
 import path from 'path'
+import sharp from 'sharp'
 import { URL } from 'url'
 import * as utils from './utils'
 
@@ -100,9 +101,13 @@ class GitHubStorage extends BaseStorage {
     save(file, targetDir) {
         const dir = targetDir || this.getTargetDir()
 
+        console.log(file)
+
         return Promise.all([
             this.getUniqueFileName(file, dir),
-            readFile(file.path, 'base64') // GitHub API requires content to use base64 encoding
+            file.size >= (500 * 1024)
+                ? sharp(file.path).resize({ width: 1200, height: 1200, fit: 'inside' }).withMetadata().toBuffer()
+                : readFile(file.path),
         ])
             .then(([filename, data]) => {
                 return this.client.repos.createOrUpdateFileContents({
@@ -111,7 +116,7 @@ class GitHubStorage extends BaseStorage {
                     branch: this.branch,
                     message: `Create ${filename}`,
                     path: this.getFilepath(filename),
-                    content: data
+                    content: data.toString('base64'), // GitHub API requires content to use base64 encoding
                 })
             })
             .then(res => {
